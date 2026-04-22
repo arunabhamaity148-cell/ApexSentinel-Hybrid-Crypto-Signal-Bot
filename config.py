@@ -1,12 +1,11 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import Field, field_validator
+from pydantic import Field
 from typing import List
 from pathlib import Path
 import os
 from dotenv import load_dotenv
 from loguru import logger
 
-# Load .env for local development + fallback
 load_dotenv()
 
 class Settings(BaseSettings):
@@ -27,11 +26,17 @@ class Settings(BaseSettings):
     BINANCE_API_SECRET: str = Field(default="")
     USE_TESTNET: bool = Field(default=True)
 
-    # Core Pairs & Risk
+    # Timeframes - এইগুলো যোগ করা হয়েছে
+    HTF: str = Field(default="4h")
+    MTF: str = Field(default="1h")
+    LTF: str = Field(default="15m")
+    HISTORY_LIMIT: int = Field(default=500)
+
+    # Pairs & Risk
     CORE_PAIRS: List[str] = Field(
         default_factory=lambda: ["BTCUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT", "BNBUSDT", "DOGEUSDT", "LINKUSDT", "AVAXUSDT"]
     )
-    DYNAMIC_PAIR_LIMIT: int = Field(default=5, ge=0, le=10)
+    DYNAMIC_PAIR_LIMIT: int = Field(default=5)
     MIN_24H_VOLUME_USDT: float = Field(default=50_000_000.0)
 
     MAX_RISK_PER_TRADE: float = Field(default=0.005)
@@ -49,20 +54,12 @@ class Settings(BaseSettings):
     DB_PATH: str = Field(default="data/journal.db")
     LOG_PATH: str = Field(default="logs/bot_{time:YYYY-MM-DD}.log")
 
-    @field_validator("TELEGRAM_ADMIN_ID")
-    @classmethod
-    def validate_admin_id(cls, v: int) -> int:
-        if v <= 0:
-            raise ValueError("TELEGRAM_ADMIN_ID must be a positive integer")
-        return v
-
     def get_db_path(self) -> Path:
         path = Path(self.DB_PATH)
         path.parent.mkdir(parents=True, exist_ok=True)
         return path
 
 
-# Global instance
 settings = Settings()
 
 logger.add(
