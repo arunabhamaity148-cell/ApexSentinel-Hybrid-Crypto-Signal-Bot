@@ -26,7 +26,7 @@ class Settings(BaseSettings):
     BINANCE_API_SECRET: str = Field(default="")
     USE_TESTNET: bool = Field(default=True)
 
-    # Timeframes - এইগুলো যোগ করা হয়েছে
+    # Timeframes
     HTF: str = Field(default="4h")
     MTF: str = Field(default="1h")
     LTF: str = Field(default="15m")
@@ -62,13 +62,15 @@ class Settings(BaseSettings):
 
 settings = Settings()
 
+# Detailed logging চালু করা হয়েছে
 logger.add(
     settings.LOG_PATH,
     rotation="00:00",
     retention="7 days",
-    level="INFO",
+    level="DEBUG",        # DEBUG করে দিলাম যাতে detailed log দেখা যায়
     enqueue=True
 )
 
 logger.info("✅ Config loaded successfully | Safe Mode: {} | Testnet: {}", 
             settings.ENABLE_SAFE_MODE, settings.USE_TESTNET)
+logger.debug("Detailed logging ENABLED - Filter rejection reasons দেখা যাবে")
